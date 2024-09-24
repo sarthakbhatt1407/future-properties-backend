@@ -179,7 +179,7 @@ exports.getPropertyByCity = async (req, res) => {
 
   let property;
   try {
-    property = await Property.find({ city });
+    property = await Property.find({ city: city.toLowerCase() });
     if (property.length === 0) {
       throw new Error();
     }
@@ -202,7 +202,7 @@ exports.getPropertyBySubCategory = async (req, res) => {
   try {
     property = await Property.find({
       subCategory,
-      city,
+      city: city.toLowerCase(),
     });
     if (property.length === 0) {
       throw new Error();
