@@ -42,7 +42,7 @@ app.use("/user", userRoute);
 app.use("/property", propertyRoute);
 
 app.use("/", async (req, res) => {
-  res.send("<h1>App is live</h1>");
+  res.send("<h1>App is live on the server.</h1>");
 });
 
 // Database
