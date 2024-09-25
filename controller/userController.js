@@ -15,7 +15,7 @@ const months = [
   "December",
 ];
 
-const userExists = async (req, res) => {
+exports.userExists = async (req, res) => {
   const { contactNum } = req.body;
 
   if (!contactNum || contactNum.length === 0) {
@@ -31,7 +31,7 @@ const userExists = async (req, res) => {
   return res.status(404).json({ message: "User not exists.", exists: false });
 };
 
-const userRegistration = async (req, res, next) => {
+exports.userRegistration = async (req, res, next) => {
   const { name, contactNum, locality, city, state } = req.body;
 
   //
@@ -74,7 +74,7 @@ const userRegistration = async (req, res, next) => {
   }
 };
 
-const userLogin = async (req, res) => {
+exports.userLogin = async (req, res) => {
   const { contactNum } = req.body;
   let user, token;
   try {
@@ -104,6 +104,18 @@ const userLogin = async (req, res) => {
   });
 };
 
-exports.userExists = userExists;
-exports.userRegistration = userRegistration;
-exports.userLogin = userLogin;
+exports.getUserByUserID = async (req, res) => {
+  const { id } = req.body;
+  let user;
+  try {
+    user = await User.findById(id);
+    if (!user) {
+      throw new Error();
+    }
+  } catch (error) {
+    return res.status(404).json({ message: "User not found!", status: true });
+  }
+  return res
+    .status(200)
+    .json({ user: user.toObject({ getters: true }), status: true });
+};

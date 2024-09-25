@@ -7,6 +7,7 @@ const dotenv = require("dotenv");
 // const auth = require("./middleware/auth");
 
 const userRoute = require("./routes/user");
+const queryRoute = require("./routes/query");
 const propertyRoute = require("./routes/property");
 
 dotenv.config();
@@ -40,6 +41,7 @@ app.use(express.urlencoded({ extended: false }));
 // Routes
 app.use("/user", userRoute);
 app.use("/property", propertyRoute);
+app.use("/query", queryRoute);
 
 app.use("/", async (req, res) => {
   res.send("<h1>App is live on the server.</h1>");
