@@ -1,4 +1,3 @@
-const { time } = require("console");
 const Property = require("../models/propertyModel");
 const fs = require("fs");
 const months = [
@@ -78,6 +77,25 @@ exports.createProperty = async (req, res) => {
     category,
     subCategory,
   } = req.body;
+  // console.log({
+  //   title,
+  //   desc,
+  //   locality,
+  //   city,
+  //   state,
+  //   area,
+  //   price,
+  //   facing,
+  //   propertyStatus,
+  //   furnishing,
+  //   floors,
+  //   facingRoad,
+  //   old,
+  //   userId,
+  //   category,
+  //   subCategory,
+  // });
+  // return;
   const dateAndTime = dateAndTimeGettr();
 
   if (!req.files) {
@@ -122,8 +140,11 @@ exports.createProperty = async (req, res) => {
       time: dateAndTime.time,
       subCategory,
     });
+
     await createdProperty.save();
   } catch (error) {
+    console.log(error);
+
     for (const file of files) {
       fs.unlink(file.path, (err) => {});
     }
@@ -131,6 +152,7 @@ exports.createProperty = async (req, res) => {
       .status(400)
       .json({ message: "Something went wrong!", status: false });
   }
+
   return res.status(201).json({
     message: "Property added successfully. ",
     status: true,
@@ -218,4 +240,84 @@ exports.getPropertyBySubCategory = async (req, res) => {
     }),
     status: true,
   });
+};
+
+exports.getAllProperties = async (req, res) => {
+  let properties;
+  try {
+    properties = await Property.find({});
+  } catch (error) {
+    return res
+      .status(404)
+      .json({ message: "Property not found!", status: false });
+  }
+  return res.status(200).json({
+    properties: properties.map((pro) => {
+      return pro.toObject({ getters: true });
+    }),
+    status: true,
+  });
+};
+
+exports.updatePropertyStatus = async (req, res) => {
+  const { id, action, subC } = req.body;
+  let property;
+  try {
+    property = await Property.findById(id);
+
+    if (!property) {
+      throw new Error();
+    }
+  } catch (error) {
+    console.log(error);
+
+    return res
+      .status(404)
+      .json({ message: "Property not found!", success: false });
+  }
+  if (action === "subC") {
+    property.subCategory = subC;
+    try {
+      await property.save();
+    } catch (error) {
+      // console.log(error);
+
+      return res
+        .status(500)
+        .json({ message: "Something went wrong.", success: false });
+    }
+    return res
+      .status(200)
+      .json({ message: "Property Updated.", success: true });
+  }
+  if (action === "status") {
+    property.status = "approved";
+    try {
+      await property.save();
+    } catch (error) {
+      return res
+        .status(500)
+        .json({ message: "Something went wrong.", success: false });
+    }
+    return res
+      .status(200)
+      .json({ message: "Property Updated.", success: true });
+  }
+  if (action === "delete") {
+    const images = property.images.split("+");
+
+    try {
+      await Property.deleteOne();
+    } catch (error) {
+      return res
+        .status(500)
+        .json({ message: "Something went wrong.", success: false });
+    }
+    for (const img of images) {
+      fs.unlink(img, (err) => {});
+    }
+    return res
+      .status(200)
+      .json({ message: "Property deleted.", success: true });
+  }
 };

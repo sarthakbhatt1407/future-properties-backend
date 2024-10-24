@@ -98,6 +98,7 @@ exports.userLogin = async (req, res) => {
       userSince: user.userSince,
       token: token,
       city: user.address.city,
+      isAdmin: user.isAdmin,
     },
     message: "Logged In",
     isloggedIn: true,
@@ -118,4 +119,39 @@ exports.getUserByUserID = async (req, res) => {
   return res
     .status(200)
     .json({ user: user.toObject({ getters: true }), status: true });
+};
+exports.getAllUsers = async (req, res) => {
+  let users;
+  try {
+    users = await User.find({});
+  } catch (error) {}
+  return res.status(200).json({
+    users: users.map((u) => {
+      return u.toObject({ getters: true });
+    }),
+    status: true,
+  });
+};
+
+exports.deleteUser = async (req, res) => {
+  const { id } = req.body;
+  let user;
+  try {
+    user = await User.findById(id);
+    console.log(user);
+
+    if (!user) {
+      throw new Error();
+    }
+  } catch (error) {
+    return res.status(404).json({ message: "User not found!", success: false });
+  }
+  try {
+    await user.deleteOne();
+  } catch (error) {
+    return res
+      .status(500)
+      .json({ message: "Error deleting user", success: false });
+  }
+  return res.status(200).json({ message: "User Deleted", success: true });
 };
