@@ -201,7 +201,10 @@ exports.getPropertyByCity = async (req, res) => {
 
   let property;
   try {
-    property = await Property.find({ city: city.toLowerCase() });
+    property = await Property.find({
+      city: city.toLowerCase(),
+      status: "approved",
+    });
     if (property.length === 0) {
       throw new Error();
     }
@@ -218,13 +221,36 @@ exports.getPropertyByCity = async (req, res) => {
   });
 };
 exports.getPropertyBySubCategory = async (req, res) => {
-  const { subCategory, city } = req.body;
+  const { subCategory, city, action } = req.body;
 
   let property;
+  if (action == "rented") {
+    try {
+      property = await Property.find({
+        category: "Rental",
+        city: city.toLowerCase(),
+        status: "approved",
+      });
+      if (property.length === 0) {
+        throw new Error();
+      }
+    } catch (error) {
+      return res
+        .status(404)
+        .json({ message: "Property not found!", status: false });
+    }
+    return res.status(200).json({
+      properties: property.map((pro) => {
+        return pro.toObject({ getters: true });
+      }),
+      status: true,
+    });
+  }
   try {
     property = await Property.find({
       subCategory,
       city: city.toLowerCase(),
+      status: "approved",
     });
     if (property.length === 0) {
       throw new Error();
@@ -242,10 +268,26 @@ exports.getPropertyBySubCategory = async (req, res) => {
   });
 };
 
-exports.getAllProperties = async (req, res) => {
+exports.getAllPropertiesAdmin = async (req, res) => {
   let properties;
   try {
     properties = await Property.find({});
+  } catch (error) {
+    return res
+      .status(404)
+      .json({ message: "Property not found!", status: false });
+  }
+  return res.status(200).json({
+    properties: properties.map((pro) => {
+      return pro.toObject({ getters: true });
+    }),
+    status: true,
+  });
+};
+exports.getAllProperties = async (req, res) => {
+  let properties;
+  try {
+    properties = await Property.find({ status: "approved" });
   } catch (error) {
     return res
       .status(404)
