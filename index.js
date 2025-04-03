@@ -8,6 +8,7 @@ const dotenv = require("dotenv");
 
 const userRoute = require("./routes/user");
 const queryRoute = require("./routes/query");
+const blogRoute = require("./routes/blog");
 const propertyRoute = require("./routes/property");
 
 dotenv.config();
@@ -16,7 +17,7 @@ const cors = require("cors");
 
 app.use(cors({
   // origin: "https://futureproperties.org", // Replace with your frontend URL
-  origin: "*", // Replace with your frontend URL
+  origin: "http://localhost:3000", // Replace with your frontend URL
   methods: ["GET", "POST", "PATCH", "DELETE"],
   allowedHeaders: ["Origin", "X-Requested-With", "Content-Type", "Accept", "Authorization"]
 }));
@@ -39,6 +40,7 @@ app.use(express.json({ limit: "50mb" })); // Adjust the size as needed
 app.use(express.urlencoded({ extended: true, limit: "50mb" }));
 // Routes
 app.use("/user", userRoute);
+app.use("/blog", blogRoute);
 app.use("/property", propertyRoute);
 app.use("/query", queryRoute);
 
