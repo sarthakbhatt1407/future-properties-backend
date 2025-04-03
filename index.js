@@ -12,6 +12,14 @@ const propertyRoute = require("./routes/property");
 
 dotenv.config();
 const PORT = process.env.PORT || 3000;
+const cors = require("cors");
+
+app.use(cors({
+  // origin: "https://futureproperties.org", // Replace with your frontend URL
+  origin: "*", // Replace with your frontend URL
+  methods: ["GET", "POST", "PATCH", "DELETE"],
+  allowedHeaders: ["Origin", "X-Requested-With", "Content-Type", "Accept", "Authorization"]
+}));
 
 // file serving
 // Absolute paths for the directories
@@ -26,18 +34,9 @@ app.use("/uploads/audios", express.static(audioUploadDirectory));
 app.use("/uploads/documents", express.static(documentUploadDirectory));
 app.use("/uploads/reports", express.static(reportUploadDirectory));
 
-app.use((req, res, next) => {
-  res.setHeader("Access-Control-Allow-Origin", "*");
-  res.setHeader(
-    "Access-Control-Allow-Headers",
-    "Origin, X-Requested-With, Content-Type, Accept, Authorization"
-  );
-  res.setHeader("Access-Control-Allow-Methods", "GET, POST, PATCH, DELETE");
-  next();
-});
-app.use(express.json());
-app.use(express.urlencoded({ extended: false }));
 
+app.use(express.json({ limit: "50mb" })); // Adjust the size as needed
+app.use(express.urlencoded({ extended: true, limit: "50mb" }));
 // Routes
 app.use("/user", userRoute);
 app.use("/property", propertyRoute);
@@ -46,6 +45,7 @@ app.use("/query", queryRoute);
 app.use("/", async (req, res) => {
   res.send("<h1>App is live on the server.</h1>");
 });
+
 
 // Database
 mongoose
@@ -56,5 +56,7 @@ mongoose
     });
   })
   .catch((err) => {
+    console.log(err);
+    
     console.log("Connection Failed!");
   });
